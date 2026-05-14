@@ -3,7 +3,7 @@ import axios from "axios";
 
 // ── الإعدادات والعملات ──────────────────────────────────────
 const RATE = 90000;
-const API_URL = "http://localhost:5000/api"; // تأكد أن السيرفر يعمل على هذا الرابط
+const API_URL = "/api"; // تأكد أن السيرفر يعمل على هذا الرابط
 const formatUSD = (n) => `$${Number(n || 0).toFixed(2)}`;
 const formatLBP = (n) => `${Math.round((n || 0) * RATE).toLocaleString()} ل.ل`;
 
