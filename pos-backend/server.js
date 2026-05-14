@@ -8,20 +8,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// مسار الواجهة الأمامية (build/dist)
+// المسارات
 const distPath = path.resolve(__dirname, '../dist');
+const assetsPath = path.resolve(__dirname, '../dist/assets');
 
-// تقديم الملفات الثابتة
+// static files
+app.use('/assets', express.static(assetsPath));
 app.use(express.static(distPath));
 
-// الاتصال بقاعدة البيانات
+// MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pos_db';
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ متصل بـ MongoDB"))
   .catch(err => console.error("❌ فشل الاتصال بقاعدة البيانات:", err));
 
-// Schema المنتج
+// Schema
 const productSchema = new mongoose.Schema({
   name: { type: String, required: [true, 'اسم المنتج مطلوب'] },
   price: { type: Number, required: true, min: [0, 'السعر لا يمكن أن يكون سالباً'] },
@@ -32,7 +34,7 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model('Product', productSchema);
 
-// جلب المنتجات
+// GET products
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -42,7 +44,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// إضافة منتج
+// ADD product
 app.post('/api/products', async (req, res) => {
   try {
     const newProduct = new Product(req.body);
@@ -56,7 +58,7 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-// البيع وتحديث المخزون
+// SALES
 app.post('/api/sales', async (req, res) => {
   const { cart } = req.body;
 
@@ -86,7 +88,7 @@ app.post('/api/sales', async (req, res) => {
   }
 });
 
-// حذف منتج
+// DELETE product
 app.delete('/api/products/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -96,11 +98,13 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
-// أي رابط غير API يرجع React/Vue app
+// catch-all
 app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-// تشغيل السيرفر
+// server start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 السيرفر يعمل على منفذ ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 السيرفر يعمل على منفذ ${PORT}`)
+);
