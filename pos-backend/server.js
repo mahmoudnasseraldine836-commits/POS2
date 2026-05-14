@@ -98,8 +98,14 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
-// catch-all
-app.get('*', (req, res) => {
+/* =========================
+   ✅ FIXED CATCH-ALL (IMPORTANT)
+   ========================= */
+
+// هذا الحل يمنع crash في path-to-regexp
+// ويعمل بشكل أفضل مع React Router
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
