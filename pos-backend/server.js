@@ -5,6 +5,10 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 app.use(express.json());
+const path = require('path');
+
+// تقديم الملفات الجاهزة من مجلد dist (الواجهة الأمامية)
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // الاتصال بقاعدة البيانات (يفضل استخدام ملف .env لحفظ الرابط)
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/pos_db';
@@ -72,6 +76,12 @@ app.delete('/api/products/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "فشل الحذف" });
   }
+});
+
+
+// أي مسار غير معروف يوجه المستخدم لملف index.html الخاص بـ React/Vite
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
